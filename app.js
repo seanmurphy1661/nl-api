@@ -6,7 +6,6 @@ var fs = require('fs');
 var https = require('https');
 var http = require('http');
 
-
 const db = require("knex")({
     client: 'pg',
     connection: {
@@ -44,10 +43,7 @@ if (process.env.API_HTTPS === "NO"){
         console.log(`Connecting to ${process.env.DB_HOST}:${process.env.DB_PORT}`);
         console.log(`Configured for ${process.env.DB_USER}@${process.env.DB_DATABASE}`)
     });
-
 };
-
-;
 
 app.use(express.json());
 
