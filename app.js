@@ -4,10 +4,8 @@ const express = require('express');
 
 var fs = require('fs');
 var https = require('https');
+var http = require('http');
 
-var privateKey  = fs.readFileSync(process.env.SSL_KEY, 'utf8');
-var certificate = fs.readFileSync(process.env.SSL_CERT, 'utf8');
-var credentials = {key: privateKey, cert: certificate};
 
 const db = require("knex")({
     client: 'pg',
@@ -24,13 +22,30 @@ const db = require("knex")({
 const app = express();
 const port = process.env.API_PORT;
 
-var httpsServer = https.createServer(credentials, app);
+if (process.env.API_HTTPS === "NO"){
+    var httpServer = https.createServer(app);
 
-httpsServer.listen(port,() => {
-    console.log(`API server listening on port ${port}`);
-    console.log(`Connecting to ${process.env.DB_HOST}:${process.env.DB_PORT}`);
-    console.log(`Configured for ${process.env.DB_USER}@${process.env.DB_DATABASE}`)
-});
+    httpServer.listen(port,() => {
+        console.log(`API server listening on port ${port}`);
+        console.log(`HTTPS is set to ${process.env.API_HTTPS}`);
+        console.log(`Connecting to ${process.env.DB_HOST}:${process.env.DB_PORT}`);
+        console.log(`Configured for ${process.env.DB_USER}@${process.env.DB_DATABASE}`)
+    });
+}else{
+    var privateKey  = fs.readFileSync(process.env.SSL_KEY, 'utf8');
+    var certificate = fs.readFileSync(process.env.SSL_CERT, 'utf8');
+    var credentials = {key: privateKey, cert: certificate};
+    var httpsServer = https.createServer(credentials, app);
+
+    httpsServer.listen(port,() => {
+        console.log(`API server listening on port ${port}`);
+        console.log(`HTTPS is set to ${process.env.API_HTTPS}`);
+        console.log(`Connecting to ${process.env.DB_HOST}:${process.env.DB_PORT}`);
+        console.log(`Configured for ${process.env.DB_USER}@${process.env.DB_DATABASE}`)
+    });
+
+};
+
 ;
 
 app.use(express.json());
