@@ -19,15 +19,16 @@ const db = require("knex")({
     pool: { min:0, max:4},
     acquireConnectionTimeout: 10000
 });
+
 const app = express();
 const port = process.env.API_PORT;
 
 if (process.env.API_HTTPS === "NO"){
-    var httpServer = https.createServer(app);
+    var httpServer = http.createServer(app);
 
     httpServer.listen(port,() => {
         console.log(`API server listening on port ${port}`);
-        console.log(`HTTPS is set to ${process.env.API_HTTPS}`);
+        console.log(`HTTPS is OFF (${process.env.API_HTTPS})`);
         console.log(`Connecting to ${process.env.DB_HOST}:${process.env.DB_PORT}`);
         console.log(`Configured for ${process.env.DB_USER}@${process.env.DB_DATABASE}`)
     });
@@ -39,7 +40,7 @@ if (process.env.API_HTTPS === "NO"){
 
     httpsServer.listen(port,() => {
         console.log(`API server listening on port ${port}`);
-        console.log(`HTTPS is set to ${process.env.API_HTTPS}`);
+        console.log(`HTTPS is ON (${process.env.API_HTTPS})`);
         console.log(`Connecting to ${process.env.DB_HOST}:${process.env.DB_PORT}`);
         console.log(`Configured for ${process.env.DB_USER}@${process.env.DB_DATABASE}`)
     });
