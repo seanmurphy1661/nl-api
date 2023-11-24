@@ -127,7 +127,7 @@ app.post('/eventsbydate', async (req, res) => {
     }
 });
 
-app.get('/eventsbykind', async (req, res) => {
+app.post('/eventsbykind', async (req, res) => {
     if (req.validateKey){
         try{
             const rc_msg = await db('events').select("event_kind").count().groupBy("event_kind").orderBy("count","desc");
