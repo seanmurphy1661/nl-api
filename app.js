@@ -51,58 +51,107 @@ app.get('/', (req, res) => {
     res.send('Not Implemented');
 });
 
-app.get('/eventcount', async (req, res) => {
+app.options('/*', (req,res) =>{
+    console.log("/*: OPTIONS");
     res.setHeader("Access-Control-Allow-Origin","*");
-    res.setHeader("Content-Security-Policy","upgrade-insecure-requests");
-    try{
-        const rc_msg = await db('events').count();
-        res.send(rc_msg);
-    }
-    catch (error){
-        res.status(500);
+    res.setHeader("Access-Control-Request-Method","POST");
+    res.setHeader("Access-Control-Allow-Headers","content-type");
+    res.sendStatus(200); 
+});
+
+const validateKey = function (req,res,next) {
+    if (req.body.api_key !== process.env.API_KEY){
+        req.validateKey = false;
+    } else {
+        req.validateKey = true;
+    } 
+    res.setHeader("Access-Control-Allow-Origin","*");
+    next()
+}
+
+app.use(validateKey);
+
+app.post('/topnposters', async (req, res) => {
+       if (req.validateKey){
+        try{
+            const rc_msg = await db('events').select("event_pubkey").count().groupBy("event_pubkey").orderBy("count","desc").limit(10);
+            res.send(rc_msg);
+        }
+        catch (error){
+            res.status(500);
+        }
+    }else{
+        res.sendStatus(400);
     }
 });
 
-app.get('/eventsbydate', async (req, res) => {
-    res.setHeader("Access-Control-Allow-Origin","*");
-    try{
-        const rc_msg = await db.raw(`select date_trunc('day',"first_seen") as "rpt_date",count(*) from "events" group by date_trunc('day',"first_seen") order by "rpt_date" desc`);
-        res.send(rc_msg["rows"]);
+app.post('/eventcount', async (req, res) => {
+    if (req.validateKey){
+        try{
+            const rc_msg = await db('events').count();
+            res.send(rc_msg);
+        }
+        catch (error){
+            res.status(500);
+        }
+    }else{
+        res.sendStatus(400);
+    } 
+});
+
+app.post('/postercount', async (req, res) => {
+    if (req.validateKey){
+        try{
+            const rc_msg = await db('events').countDistinct("event_pubkey");
+            res.send(rc_msg);
+        }
+        catch (error){
+            res.status(500);
+        }
+    }else{
+        res.sendStatus(400);
     }
-    catch (error){
-        res.status(500);
-    }   
+});
+
+app.post('/eventsbydate', async (req, res) => {
+    if (req.validateKey){
+        try{
+            const rc_msg = await db.raw(`select date_trunc('day',"first_seen") as "rpt_date",count(*) from "events" group by date_trunc('day',"first_seen") order by "rpt_date" desc`);
+            res.send(rc_msg["rows"]);
+        }
+        catch (error){
+            res.status(500);
+        }   
+    }else{
+        res.sendStatus(400);
+    }
 });
 
 app.get('/eventsbykind', async (req, res) => {
-    res.setHeader("Access-Control-Allow-Origin","*");
-    try{
-        const rc_msg = await db('events').select("event_kind").count().groupBy("event_kind").orderBy("count","desc");
-        res.send(rc_msg);
+    if (req.validateKey){
+        try{
+            const rc_msg = await db('events').select("event_kind").count().groupBy("event_kind").orderBy("count","desc");
+            res.send(rc_msg);
+        }
+        catch (error){
+            res.status(500);
+        }   
+    }else{
+        res.sendStatus(400);
     }
-    catch (error){
-        res.status(500);
-    }   
 });
 
 app.get('/postercount', async (req, res) => {
-    res.setHeader("Access-Control-Allow-Origin","*");
-    try{
-        const rc_msg = await db('events').countDistinct("event_pubkey");
-        res.send(rc_msg);
-    }
-    catch (error){
-        res.status(500);
+    if (req.validateKey){
+        try{
+            const rc_msg = await db('events').countDistinct("event_pubkey");
+            res.send(rc_msg);
+        }
+        catch (error){
+            res.status(500);
+        }
+    }else{
+        res.sendStatus(400);
     }
 });
 
-app.get('/topnposters', async (req, res) => {
-    res.setHeader("Access-Control-Allow-Origin","*");
-    try{
-        const rc_msg = await db('events').select("event_pubkey").count().groupBy("event_pubkey").orderBy("count","desc").limit(10);
-        res.send(rc_msg);
-    }
-    catch (error){
-        res.status(500);
-    }
-});
