@@ -52,7 +52,6 @@ app.get('/', (req, res) => {
 });
 
 app.options('/*', (req,res) =>{
-    console.log("/*: OPTIONS");
     res.setHeader("Access-Control-Allow-Origin","*");
     res.setHeader("Access-Control-Request-Method","POST");
     res.setHeader("Access-Control-Allow-Headers","content-type");
