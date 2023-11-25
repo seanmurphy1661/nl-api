@@ -1,7 +1,7 @@
 # nl-api
 
 prerequistes: dotenv express knex node pg 
-
+```
 dotenv file:
 API_PORT = 3000 (what port should we listen on)
 API_KEY =  (this is a key that must be supplied)
@@ -13,3 +13,4 @@ DB_DATABASE = "nostr_ts_relay" (this is the database where the relay stores even
 DB_PASSWORD = (supply the password for the user context)
 SSL_KEY = (path to ssl private key)
 SSL_CERT = (path to ssl certificate)
+```
