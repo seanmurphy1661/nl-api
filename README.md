@@ -1,29 +1,24 @@
 # nl-api
-----
-```
-nl-api: an api to get realtime statistics on content and use for a nostream nostr relay. 
+nl-api is an ExpressJS api that uses knex to access the nostr relay database.
 
-this is a proof of concept for getting realtime information from a nostream nostr database.
 
-any product owners out there? 
-as a nostream operator, i want to see content and use statistics for my relay so that i can deliver better relay services. 
 
-this is meant to be an interim step for relays just starting up.  while a full ELK (or similar tech) stack is the end of the rainbow, this api is bridging the gap for me. 
-```
+
 ---
+###Routes
 ```
-functions:
-eventcount - returns the total number of rows in events table
-postercount - return the total number of unique event_pubkeys
-topnposters - returns a list of top 10 posters by number of events. 
-eventsbydate - returns the number of events summarized by date
-eventsbykind - returns the number of events summarized by kind
+
+/eventcount - returns the total number of rows in events table
+/postercount - return the total number of unique event_pubkeys
+/topnposters - returns a list of top 10 posters by number of events. 
+/eventsbydate - returns the number of events summarized by date
+/eventsbykind - returns the number of events summarized by kind
 
 ```
 ---
+###Set up
 
 ```
-set up
 
 prerequistes: dotenv express knex node pg 
 
@@ -39,9 +34,17 @@ DB_PASSWORD = (supply the password for the user context)
 SSL_KEY = (path to ssl private key)
 SSL_CERT = (path to ssl certificate)
 ```
-```
+
+---
+
 about the project
 
-nl-api is a side project i created to provide usage statistics at the content level. 
+This is a side project that came out of the nostr.1661.io project. I figured that begining relay operators don't really have the time to set up full analytical stack. I know I didn't. 
 
-```
+I got tired of logging into the database to get the stats. Plus, I could not see them on my phone. Yes, a bit obsessed...
+
+You are likely to see lots of borrowed code - this is my initial deliverable using this particular mix of tech. 
+
+Thanks for checking out the project.
+-Sean
+
