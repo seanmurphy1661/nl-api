@@ -5,7 +5,7 @@ nl-api is an ExpressJS api that uses knex to access the nostr relay database.
 
 
 ---
-###Routes
+### Routes
 ```
 
 /eventcount - returns the total number of rows in events table
@@ -16,7 +16,7 @@ nl-api is an ExpressJS api that uses knex to access the nostr relay database.
 
 ```
 ---
-###Set up
+### Set up
 
 ```
 
