@@ -58,7 +58,7 @@ app.options('/*', (req,res) =>{
     res.sendStatus(200); 
 });
 
-const validateKey = function (req,res,next) {
+const preProcess = function (req,res,next) {
     if (req.body.api_key !== process.env.API_KEY){
         req.validateKey = false;
     } else {
@@ -68,7 +68,7 @@ const validateKey = function (req,res,next) {
     next()
 }
 
-app.use(validateKey);
+app.use(preProcess);
 
 app.post('/topnposters', async (req, res) => {
        if (req.validateKey){
