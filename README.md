@@ -7,12 +7,21 @@ nl-api is an ExpressJS api that uses knex to access the nostr relay database.
 ---
 ### Routes
 ```
+post to all routes with the following payload 
+{
+    api_key: <api-key>,
+    limit: <nlimit>
+}
+
+api_key: this is the shared key stored in API_KEY
+limit: uses limit() to restrict the number of rows returned 
+
 
 /eventcount - returns the total number of rows in events table
 /postercount - return the total number of unique event_pubkeys
-/topnposters - returns a list of top 10 posters by number of events. 
+/topnposters - returns a list of top <limit> posters by number of events
 /eventsbydate - returns the number of events summarized by date
-/eventsbykind - returns the number of events summarized by kind
+/eventsbykind - returns a list of <limit> kinds with the corresponding number of events
 
 ```
 ---
@@ -31,6 +40,7 @@ DB_PORT = 5432 (database port)
 DB_USER =  (user context for executing sql)
 DB_DATABASE = "nostr_ts_relay" (this is the default database where the relay stores events)
 DB_PASSWORD = (supply the password for the user context)
+DEFAULT_LIMIT = 10
 SSL_KEY = (path to ssl private key)
 SSL_CERT = (path to ssl certificate)
 ```

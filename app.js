@@ -6,6 +6,7 @@ var fs = require('fs');
 var https = require('https');
 var http = require('http');
 
+
 const db = require("knex")({
     client: 'pg',
     connection: {
@@ -25,7 +26,7 @@ const port = process.env.API_PORT;
 if (process.env.API_HTTPS === "NO"){
     var httpServer = http.createServer(app);
 
-    httpServer.listen(port,() => {
+    httpServer.listen(port,'0.0.0.0',() => {
         console.log(`API server listening on port ${port}`);
         console.log(`HTTPS is OFF (${process.env.API_HTTPS})`);
         console.log(`Connecting to ${process.env.DB_HOST}:${process.env.DB_PORT}`);
@@ -37,7 +38,7 @@ if (process.env.API_HTTPS === "NO"){
     var credentials = {key: privateKey, cert: certificate};
     var httpsServer = https.createServer(credentials, app);
 
-    httpsServer.listen(port,() => {
+    httpsServer.listen(port,'0.0.0.0',() => {
         console.log(`API server listening on port ${port}`);
         console.log(`HTTPS is ON (${process.env.API_HTTPS})`);
         console.log(`Connecting to ${process.env.DB_HOST}:${process.env.DB_PORT}`);
@@ -47,8 +48,8 @@ if (process.env.API_HTTPS === "NO"){
 
 app.use(express.json());
 
-app.get('/', (req, res) => {
-    res.send('Not Implemented');
+app.get('/*', (req, res) => {
+    res.send('not implemented');
 });
 
 app.options('/*', (req,res) =>{
@@ -70,11 +71,27 @@ const preProcess = function (req,res,next) {
 
 app.use(preProcess);
 
-app.post('/topnposters', async (req, res) => {
-       if (req.validateKey){
+app.post('/*', async (req,res) =>{
+
+    nlimit = (req.body.limit) ? Number(req.body.limit) : process.env.DEFAULT_LIMIT;
+  
+    if (req.validateKey){
         try{
-            const rc_msg = await db('events').select("event_pubkey").count().groupBy("event_pubkey").orderBy("count","desc").limit(10);
-            res.send(rc_msg);
+            switch (req.url) {
+                case '/eventcount':
+                    res.send( await db('events').count());
+                case '/eventsbydate' : 
+                    rc_msg = await db.raw(`select date_trunc('day',"first_seen") as "rpt_date",count(*) from "events" group by date_trunc('day',"first_seen") order by "rpt_date" desc`);
+                    res.send(rc_msg["rows"]);
+                case '/eventsbykind' :
+                    res.send(await db('events').select("event_kind").count().groupBy("event_kind").orderBy("count","desc").limit(nlimit));
+                case '/postercount' :
+                    res.send(await db('events').countDistinct("event_pubkey"));
+                case '/topnposters' :
+                    res.send(await db('events').select("event_pubkey").count().groupBy("event_pubkey").orderBy("count","desc").limit(nlimit) );
+                default:
+                    res.sendStatus(400);                
+            }
         }
         catch (error){
             res.status(500);
@@ -83,74 +100,3 @@ app.post('/topnposters', async (req, res) => {
         res.sendStatus(400);
     }
 });
-
-app.post('/eventcount', async (req, res) => {
-    if (req.validateKey){
-        try{
-            const rc_msg = await db('events').count();
-            res.send(rc_msg);
-        }
-        catch (error){
-            res.status(500);
-        }
-    }else{
-        res.sendStatus(400);
-    } 
-});
-
-app.post('/postercount', async (req, res) => {
-    if (req.validateKey){
-        try{
-            const rc_msg = await db('events').countDistinct("event_pubkey");
-            res.send(rc_msg);
-        }
-        catch (error){
-            res.status(500);
-        }
-    }else{
-        res.sendStatus(400);
-    }
-});
-
-app.post('/eventsbydate', async (req, res) => {
-    if (req.validateKey){
-        try{
-            const rc_msg = await db.raw(`select date_trunc('day',"first_seen") as "rpt_date",count(*) from "events" group by date_trunc('day',"first_seen") order by "rpt_date" desc`);
-            res.send(rc_msg["rows"]);
-        }
-        catch (error){
-            res.status(500);
-        }   
-    }else{
-        res.sendStatus(400);
-    }
-});
-
-app.post('/eventsbykind', async (req, res) => {
-    if (req.validateKey){
-        try{
-            const rc_msg = await db('events').select("event_kind").count().groupBy("event_kind").orderBy("count","desc");
-            res.send(rc_msg);
-        }
-        catch (error){
-            res.status(500);
-        }   
-    }else{
-        res.sendStatus(400);
-    }
-});
-
-app.get('/postercount', async (req, res) => {
-    if (req.validateKey){
-        try{
-            const rc_msg = await db('events').countDistinct("event_pubkey");
-            res.send(rc_msg);
-        }
-        catch (error){
-            res.status(500);
-        }
-    }else{
-        res.sendStatus(400);
-    }
-});
-
