@@ -11,6 +11,7 @@ The api provides for five routes. Every post request should include the followin
 {
     api_key: <api-key>,
     limit: <nlimit>,
+    kindFocus: < kind | "all" >,
     dateRange: [<startDate>,<endDate>]
 }
 ```
