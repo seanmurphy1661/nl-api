@@ -19,16 +19,18 @@ The api provides for five routes. Every post request should include the followin
 |api_key| this is the shared key stored in API_KEY|
 |limit| uses limit() to restrict the number of rows returned |
 |dateRange|two item array for date range|
+|kindFocus|limit selection to specific kind|
 
 
 
-| route|use|Limit|Date Range|Default Alignment|
+| route|use|Limit|Date Range|Kind|
 |:--------------|:-----|:---------------------------:|:---------------------------:|------------------------|
-| /eventcount  |get the total number of events| N | Y | N/A |
-| /eventsbydate |get the number of events by day| N | N | N/A |
-| /eventsbykind |get the number of events by kind| Y | Y | N/A |
-| /postercount |get the total number of unique npubs| N | Y | N/A |
-| /topnposters |get the number of events by npub| Y | Y | N/A |
+| /eventcount  |get the total number of events| N | Y | N |
+| /eventsbydate |get the number of events by day| N | N | N |
+| /eventsbykind |get the number of events by kind| Y | Y | N |
+| /eventsbyso | get the number of events by day | N | N | Y |
+| /postercount |get the total number of unique npubs| N | Y | N |
+| /topnposters |get the number of events by npub| Y | Y | N |
 
 
 ---
