@@ -6,24 +6,31 @@ nl-api is an ExpressJS api that uses knex to access the nostr relay database.
 
 ---
 ### Routes
+The api provides for five routes. Every post request should include the following parameters
 ```
-post to all routes with the following payload 
 {
     api_key: <api-key>,
-    limit: <nlimit>
+    limit: <nlimit>,
+    dateRange: [<startDate>,<endDate>]
 }
-
-api_key: this is the shared key stored in API_KEY
-limit: uses limit() to restrict the number of rows returned 
-
-
-/eventcount - returns the total number of rows in events table
-/postercount - return the total number of unique event_pubkeys
-/topnposters - returns a list of top <limit> posters by number of events
-/eventsbydate - returns the number of events summarized by date
-/eventsbykind - returns a list of <limit> kinds with the corresponding number of events
-
 ```
+|Parameter| Use|
+|:----|:-----|
+|api_key| this is the shared key stored in API_KEY|
+|limit| uses limit() to restrict the number of rows returned |
+|dateRange|two item array for date range|
+
+
+
+| route|use|Limit|Date Range|Default Alignment|
+|:--------------|:-----|:---------------------------:|:---------------------------:|------------------------|
+| /eventcount  |get the total number of events| N | Y | N/A |
+| /eventsbydate |get the number of events by day| N | N | N/A |
+| /eventsbykind |get the number of events by kind| Y | Y | N/A |
+| /postercount |get the total number of unique npubs| N | Y | N/A |
+| /topnposters |get the number of events by npub| Y | Y | N/A |
+
+
 ---
 ### Set up
 

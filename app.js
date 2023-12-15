@@ -5,6 +5,7 @@ const express = require('express');
 var fs = require('fs');
 var https = require('https');
 var http = require('http');
+const { group } = require('console');
 
 
 const db = require("knex")({
@@ -73,30 +74,54 @@ app.use(preProcess);
 
 app.post('/*', async (req,res) =>{
 
-    nlimit = (req.body.limit) ? Number(req.body.limit) : process.env.DEFAULT_LIMIT;
-  
-    if (req.validateKey){
-        try{
-            switch (req.url) {
-                case '/eventcount':
-                    res.send( await db('events').count());
-                case '/eventsbydate' : 
-                    rc_msg = await db.raw(`select date_trunc('day',"first_seen") as "rpt_date",count(*) from "events" group by date_trunc('day',"first_seen") order by "rpt_date" desc`);
-                    res.send(rc_msg["rows"]);
-                case '/eventsbykind' :
-                    res.send(await db('events').select("event_kind").count().groupBy("event_kind").orderBy("count","desc").limit(nlimit));
-                case '/postercount' :
-                    res.send(await db('events').countDistinct("event_pubkey"));
-                case '/topnposters' :
-                    res.send(await db('events').select("event_pubkey").count().groupBy("event_pubkey").orderBy("count","desc").limit(nlimit) );
-                default:
-                    res.sendStatus(400);                
-            }
-        }
-        catch (error){
-            res.status(500);
-        }
-    }else{
+    console.log(req.url,"req.body:",req.body);
+
+    if (! req.validateKey) {
         res.sendStatus(400);
+        return;
+    }
+
+    // defaults
+    nlimit = (req.body.limit) ? Number(req.body.limit) : process.env.DEFAULT_LIMIT;
+    dateRange = (req.body.dateRange) ? req.body.dateRange : ['2020-01-01','2119-12-31'];
+    kindFocus = (req.body.kindFocus) ? req.body.kindFocus : "all";
+
+    try{
+        switch (req.url) {
+            case '/eventcount':
+                res.send(await db('events').count().whereBetween("first_seen",dateRange));
+                break;
+            case '/eventsbykind' :
+                res.send(await db('events').select("event_kind").count().groupBy("event_kind").orderBy("count","desc").whereBetween("first_seen",dateRange).limit(nlimit));
+                break;
+            case '/postercount' :
+                res.send(await db('events').countDistinct("event_pubkey").whereBetween("first_seen",dateRange));
+                break;
+            case '/topnposters' :
+                res.send(await db('events').select("event_pubkey").count().whereBetween("first_seen",dateRange).groupBy("event_pubkey").orderBy("count","desc").limit(nlimit) );
+                break;
+            case '/eventsbydate' : 
+                rc_msg = await db.raw(`select date_trunc('day',"first_seen") as "rpt_date",count(*) from "events" group by date_trunc('day',"first_seen") order by "rpt_date" desc`);
+                res.send(rc_msg["rows"]);
+                break;
+            case '/eventsbyso' : 
+                select_clause = `select date_trunc('day',"first_seen") as "rpt_date",count(*) from "events" `;
+                if (kindFocus !== 'all') 
+                    where_clause = `where event_kind = ` + Number(kindFocus ) + ` ` ;
+                else
+                    where_clause = ' ';
+                group_by_clause = `group by date_trunc('day',"first_seen") `;
+                order_by_clause = `order by "rpt_date" desc`;
+                sql_command = select_clause + where_clause+ group_by_clause + order_by_clause; 
+
+                rc_msg = await db.raw(sql_command);
+                res.send(rc_msg["rows"]);
+                break;
+            default:
+                res.sendStatus(400);                
+        }
+    }
+    catch (error){
+        res.status(500);
     }
 });
